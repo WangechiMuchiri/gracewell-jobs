@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+/* === Custom Animations === */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes floatLg {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+@keyframes drift {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(6px) translateX(4px); }
+}
+
+/* Register utilities */
+@utility animate-float {
+  animation: float 4.5s ease-in-out infinite;
+}
+@utility animate-floatLg {
+  animation: floatLg 6s ease-in-out infinite;
+}
+@utility animate-drift {
+  animation: drift 5.5s ease-in-out infinite;
+}

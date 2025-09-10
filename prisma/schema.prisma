@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_URL")  // pooled (runtime)
+  directUrl = env("POSTGRES_URL_NON_POOLING")    // direct (migrate/introspect)
+}
+
+enum WorkType {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+}
+enum ApplicationStatus {
+  SUBMITTED       // user just applied
+  UNDER_REVIEW    // being read by team
+  SHORTLISTED     // moved forward
+  INTERVIEWING    // one or more interviews scheduled
+  OFFERED         // offer sent
+  HIRED           // accepted offer (end-state)
+  REJECTED        // not moving forward (end-state)
+  WITHDRAWN       // applicant withdrew (end-state)
+}
+
+model Company {
+  id    String @id @default(uuid())
+  name  String @unique
+  jobs  Job[]
+
+  @@index([name])
+}
+
+model Tag {
+  id    String @id @default(uuid())
+  slug  String @unique
+  label String
+
+  jobs JobTag[]
+}
+
+model Job {
+  id               String          @id @default(uuid())
+  companyId        String
+  title            String
+  location         String
+  workType         WorkType
+  employmentType   EmploymentType
+  salaryMin        Int?
+  salaryMax        Int?
+  currency         String?
+  description      String
+  responsibilities String?
+  qualifications   String?
+  isActive         Boolean         @default(true)
+  postedAt         DateTime        @default(now())
+  deadline         DateTime?        
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tags    JobTag[]
+  apps    Application[]
+
+  @@index([companyId])
+  @@index([postedAt])
+  @@index([workType, employmentType])
+  @@index([deadline])  
+}
+
+model JobTag {
+  jobId String
+  tagId String
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, tagId])
+}
+
+model Application {
+  id             String   @id @default(uuid())
+  jobId          String
+  applicantName  String
+  applicantEmail String
+  resumeUrl      String?
+  status         ApplicationStatus  @default(SUBMITTED)
+  createdAt      DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, createdAt])
+}
+
