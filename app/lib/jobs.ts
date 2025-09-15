@@ -1,5 +1,5 @@
 // lib/jobs.ts
-import { prisma } from '@/lib/prisma'
+import { prisma } from './prisma'
 
 export async function getHotJobs(limit = 4) {
   return prisma.job.findMany({
